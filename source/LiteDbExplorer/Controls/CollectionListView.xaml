@@ -5,10 +5,13 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:properties="clr-namespace:LiteDbExplorer.Properties"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:converters="clr-namespace:LiteDbExplorer.Controls.Converters"
              mc:Ignorable="d"
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
         <ResourceDictionary>
+            <converters:ComboBoxItemToIntConverter x:Key="ComboBoxItemToIntConverter" />
+
             <DataTemplate x:Key="HeaderTemplate">
                 <Grid Background="Transparent" IsHitTestVisible="True">
                     <Grid.ColumnDefinitions>
@@ -45,15 +48,46 @@
         </ResourceDictionary>
     </UserControl.Resources>
     <Grid>
-        <ListView Name="ListCollectionData"
-                  GridViewColumnHeader.Click="ListCollectionData_OnHeaderClick"
-                  VirtualizingStackPanel.IsVirtualizing="True"
-                  VirtualizingStackPanel.VirtualizationMode="Recycling"
-                  ScrollViewer.CanContentScroll="True"
-                  ScrollViewer.IsDeferredScrollingEnabled="{Binding Source={x:Static properties:Settings.Default},Path=DeferredScrolling}">
-            <ListView.View>
-                <GridView x:Name="GridCollectionData" />
-            </ListView.View>
-        </ListView>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <Grid Grid.Row="0">
+            <ListView Name="ListCollectionData"
+                      GridViewColumnHeader.Click="ListCollectionData_OnHeaderClick"
+                      VirtualizingStackPanel.IsVirtualizing="True"
+                      VirtualizingStackPanel.VirtualizationMode="Recycling"
+                      ScrollViewer.CanContentScroll="True"
+                      ScrollViewer.IsDeferredScrollingEnabled="{Binding Source={x:Static properties:Settings.Default},Path=DeferredScrolling}">
+                <ListView.View>
+                    <GridView x:Name="GridCollectionData" />
+                </ListView.View>
+            </ListView>
+        </Grid>
+        <Grid Grid.Row="1" Margin="5">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <Grid Grid.Column="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="Records per page: " />
+                <ComboBox x:Name="cmbPageSize" Grid.Column="1" Margin="5,-5,0,0" SelectedItem="{Binding CollectionReference.PageSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource ComboBoxItemToIntConverter}}" >
+                    <ComboBox.Items>
+                        <ComboBoxItem>10</ComboBoxItem>
+                        <ComboBoxItem>15</ComboBoxItem>
+                        <ComboBoxItem>20</ComboBoxItem>
+                        <ComboBoxItem>25</ComboBoxItem>
+                        <ComboBoxItem>30</ComboBoxItem>
+                        <ComboBoxItem>50</ComboBoxItem>
+                        <ComboBoxItem>100</ComboBoxItem>
+                        <ComboBoxItem>99999</ComboBoxItem>
+                    </ComboBox.Items>
+                </ComboBox>
+            </Grid>
+        </Grid>
     </Grid>
 </UserControl>

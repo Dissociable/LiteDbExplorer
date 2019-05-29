@@ -13,11 +13,17 @@ namespace LiteDbExplorer
         private ObservableCollection<DocumentReference> _items;
         private string _name;
         private DatabaseReference _database;
+        private int _page;
+        private int _pageSize;
+        private int _itemsCount;
+        private int _totalItems;
 
         public CollectionReference(string name, DatabaseReference database)
         {
             Name = name;
             Database = database;
+            Page = 0;
+            PageSize = 10;
         }
 
         public string Name
@@ -48,25 +54,76 @@ namespace LiteDbExplorer
             }
         }
 
+        public int Page
+        {
+            get => _page;
+            set
+            {
+                if (Equals(value, _page)) return;
+                OnPropertyChanging();
+                _page = value;
+                Refresh();
+                OnPropertyChanged();
+            }
+        }
+
+        public int PageSize
+        {
+            get => _pageSize;
+            set
+            {
+                if (Equals(value, _pageSize)) return;
+                OnPropertyChanging();
+                _pageSize = value;
+                Refresh();
+                OnPropertyChanged();
+            }
+        }
+
+        public int ItemsCount
+        {
+            get => _itemsCount;
+            set
+            {
+                if (Equals(value, _itemsCount)) return;
+                OnPropertyChanging();
+                _itemsCount = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public int TotalItems
+        {
+            get => _totalItems;
+            set
+            {
+                if (Equals(value, _totalItems)) return;
+                OnPropertyChanging();
+                _totalItems = value;
+                OnPropertyChanged();
+            }
+        }
+
         public ObservableCollection<DocumentReference> Items
         {
             get
             {
-                if (_items == null)
+                if (_items != null) return _items;
+                Store.Current.ResetSelectedCollection();
+                _items = new ObservableCollection<DocumentReference>();
+                foreach (var item in GetItems(LiteCollection))
                 {
-                    _items = new ObservableCollection<DocumentReference>();
-                    foreach (var item in GetAllItem(LiteCollection))
-                    {
-                        _items.Add(item);
-                    }
-                    _items.CollectionChanged += OnDocumentsCollectionChanged;
+                    _items.Add(item);
                 }
-
+                _items.CollectionChanged += OnDocumentsCollectionChanged;
+                ItemsCount = _items.Count;
+                Store.Current.SelectCollection(this);
                 return _items;
             }
             set
             {
-                OnPropertyChanging(nameof(Items));
+                OnPropertyChanging();
+                Store.Current.ResetSelectedCollection();
                 if (_items != null)
                 {
                     _items.CollectionChanged -= OnDocumentsCollectionChanged;
@@ -78,7 +135,9 @@ namespace LiteDbExplorer
                     _items.CollectionChanged += OnDocumentsCollectionChanged;
                 }
 
-                OnPropertyChanged(nameof(Items));
+                ItemsCount = _items?.Count ?? 0;
+                Store.Current.SelectCollection(this);
+                OnPropertyChanged();
             }
         }
 
@@ -153,6 +212,8 @@ namespace LiteDbExplorer
         {
             OnPropertyChanging(nameof(Items));
 
+            Store.Current.ResetSelectedCollection();
+
             if (_items == null)
             {
                 _items = new ObservableCollection<DocumentReference>();
@@ -162,10 +223,14 @@ namespace LiteDbExplorer
                 _items.Clear();
             }
 
-            foreach (var item in GetAllItem(LiteCollection))
+            foreach (var item in GetItems(LiteCollection))
             {
                 _items.Add(item);
             }
+
+            ItemsCount = _items?.Count ?? 0;
+
+            Store.Current.SelectCollection(this);
 
             OnPropertyChanged(nameof(Items));
         }
@@ -199,6 +264,32 @@ namespace LiteDbExplorer
             return LiteCollection.FindAll().Select(bsonDocument => new DocumentReference(bsonDocument, this));
         }
 
+        protected virtual IEnumerable<DocumentReference> GetItems(LiteCollection<BsonDocument> liteCollection, int page = default,
+            int pageSize = default)
+        {
+            TotalItems = liteCollection.Count();
+
+            if (page == default)
+            {
+                page = Page;
+            }
+            else
+            {
+                Page = page;
+            }
+
+            if (pageSize == default)
+            {
+                pageSize = PageSize;
+            }
+            else
+            {
+                PageSize = pageSize;
+            }
+
+            return LiteCollection.Find(Query.All(), page * pageSize, pageSize).Select(bsonDocument => new DocumentReference(bsonDocument, this));
+        }
+
         protected virtual void OnDocumentsCollectionChanged(ReferenceNodeChangeAction action, IEnumerable<DocumentReference> items)
         {
             DocumentsCollectionChanged?.Invoke(this, new CollectionReferenceChangedEventArgs<DocumentReference>(action, items));
@@ -207,6 +298,7 @@ namespace LiteDbExplorer
         public void Dispose()
         {
             Items = null;
+            Database.Dispose();
             Database = null;
         }
     }

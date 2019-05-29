@@ -107,7 +107,8 @@
                         </ListBox>
 
                         <StackPanel Orientation="Horizontal" Opacity="0.5" Margin="10,0">
-                            <TextBlock Text="{Binding DocumentsCountInfo}" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding CollectionReference.ItemsCount, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, StringFormat={}Displaying {0} Items}" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding CollectionReference.TotalItems, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, StringFormat={} Of Total {0} Items}" VerticalAlignment="Center"/>
                             <Separator Style="{StaticResource ToolDockPanelSeparator}"/>
                             <TextBlock Text="{Binding SelectedDocumentsCountInfo}" VerticalAlignment="Center"/>
                         </StackPanel>

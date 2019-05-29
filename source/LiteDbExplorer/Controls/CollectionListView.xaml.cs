@@ -450,7 +450,12 @@ namespace LiteDbExplorer.Controls
             var dataView =  (ListCollectionView)CollectionViewSource.GetDefaultView(ListCollectionData.ItemsSource);
             dataView.CustomSort = new SortBsonValue(sortBy, direction == ListSortDirection.Descending);
         }
-        
+
+        private void CmbPageSize_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            
+        }
+
         public class SortBsonValue : IComparer
         {
             private readonly string _key;
@@ -493,6 +498,5 @@ namespace LiteDbExplorer.Controls
                 return bsonValue1.CompareTo(bsonValue2);
             }
         }
-        
     }
 }

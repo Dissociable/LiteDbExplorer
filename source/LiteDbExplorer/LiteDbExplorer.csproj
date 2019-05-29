@@ -191,6 +191,7 @@
     <Compile Include="Application\CmdlineCommands.cs" />
     <Compile Include="AppBootstrapper.cs" />
     <Compile Include="Controls\AvalonEditBehaviour.cs" />
+    <Compile Include="Controls\Converters\ComboBoxItemToIntConverter.cs" />
     <Compile Include="Controls\ExtendedTextEditor.cs" />
     <Compile Include="Controls\CollectionListView.xaml.cs">
       <DependentUpon>CollectionListView.xaml</DependentUpon>
